@@ -1,3 +1,34 @@
+;; -*- mode: scheme; -*-
+(define date (js "new Date();"))
+(define date-day (date.getDate))
+(define date-month (date.getMonth))
+(define date-year (date.getYear))
+(define (equal? a b) (eq? a b))
+(define (round a) (Math.round a))
+
+(load "scm/calc-core.jscm")
 
 (define a 10)
-(msg "hello")
+(msg "hello there")
+
+(define b 'symbol)
+(msg b)
+(msg (eq? b 'symbol))
+
+(msg (/ 2 30))
+
+
+
+(connect-slider 
+ "#quantity" 
+ (lambda (v)
+   (set! calc (calc-modify-amount calc v))
+   (msg (get-nutrients 
+	 (calc-type calc)
+	 (calc-amount calc)
+	 (calc-quality calc)
+	 (calc-season calc)
+	 (calc-crop calc)
+	 (calc-soil calc)))))
+
+(msg "done")

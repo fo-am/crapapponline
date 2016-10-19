@@ -1,3 +1,4 @@
+;; -*- mode: scheme; -*-
 ;; calculator core, essentiall a decision tree with a mutiplyer
 
 (define manure-type-list (list 'cattle 'FYM 'pig 'poultry))
@@ -11,6 +12,8 @@
 (define fym-quality-list (list 'fresh 'other 'other1 'other2))
 
 (define costs (list 0.79 0.62 0.49))
+
+(msg "hello")
 
 (define images
   (list
@@ -139,7 +142,7 @@
 (define (hectares->acres a) (* a 2.47105))
 (define (m3->gallons a) (* a 219.969))
 
-(define (error . args)
+(define (error args)
   (display (apply string-append args))(newline))
 
 (define (get-nutrients type amount quality season crop soil)
