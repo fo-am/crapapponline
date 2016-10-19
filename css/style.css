@@ -35,3 +35,45 @@ button {
     background: linear-gradient(#88dd88,#66bb66);
     border: 2px solid black;
 }
+
+/* ----------------------------------------------- */
+/* clear range styles */
+
+
+/* ----------------------------------------------- */
+/* actual style */
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border: 1px solid #000000;
+  height: 2.5em;
+  width: 2.5em;
+  border-radius: 1.5em;
+  background: #8888dd;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d; /* Add cool effects to your sliders! */
+}
+
+input[type=range]::-moz-range-thumb {
+  border: 1px solid #000000;
+  height: 2.5em;
+  width: 2.5em;
+  border-radius: 1.5em;
+  background: #8888dd;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d; /* Add cool effects to your sliders! */
+}
+
+/* track */
+
+input[type=range] {
+  width: 100%;
+  height: 1em;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: linear-gradient(#aaaaff,#6666bb);
+  border-radius: 1em;
+  border: 0.2px solid #010101;
+  margin: 1em;
+}
+
