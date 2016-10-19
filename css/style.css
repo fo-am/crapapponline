@@ -1,0 +1,37 @@
+@font-face {
+  font-family: 'grobold';
+  src: local('grobold'),
+        url('../fonts/grobold.ttf');
+}
+
+body {
+    font-family: 'grobold';
+    background: url('../images/bg.png');   
+    text-align: center;
+}
+
+.gutter {
+    margin-bottom: 1em;
+    display: block;
+    overflow: hidden;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: linear-gradient(#dddd88,#bbbb66);
+    border: 2px solid black;
+    border-radius: 1em;
+    padding: 0.5em;
+    text-align: center;
+    text-align-last: center;
+}
+
+option {
+}
+
+button {
+    background: linear-gradient(#88dd88,#66bb66);
+    border: 2px solid black;
+}
