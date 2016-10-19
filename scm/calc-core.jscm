@@ -1,5 +1,5 @@
 ;; -*- mode: scheme; -*-
-;; calculator core, essentiall a decision tree with a mutiplyer
+;; calculator core, essentially a decision tree with a mutiplyer
 
 (define manure-type-list (list 'cattle 'FYM 'pig 'poultry))
 (define units-list (list 'metric 'imperial))
@@ -12,8 +12,6 @@
 (define fym-quality-list (list 'fresh 'other 'other1 'other2))
 
 (define costs (list 0.79 0.62 0.49))
-
-(msg "hello")
 
 (define images
   (list
@@ -77,7 +75,7 @@
     ((equal? s 'winter) (list-ref n 1))
     ((equal? s 'spring) (list-ref n 2))
     ((equal? s 'summer) (list-ref n 3))
-    (else (error "season " (symbol->string s) " not found") #f)))
+    (else (msg "season " (symbol->string s) " not found") #f)))
 
 (define (soil sandyshallow mediumheavy)
   (list sandyshallow mediumheavy))
@@ -86,7 +84,7 @@
   (cond
     ((equal? t 'sandyshallow) (list-ref s 0))
     ((equal? t 'mediumheavy) (list-ref s 1))
-    (else (error "soil type " (symbol->string t) " not found") #f)))
+    (else (msg "soil type " (symbol->string t) " not found") #f)))
 
 (define (crop normal g)
   (list normal g))
@@ -95,7 +93,7 @@
   (cond
     ((equal? t 'normal) (list-ref c 0))
     ((equal? t 'grass-oilseed) (list-ref c 1))
-    (else (error "crop type " (symbol->string t) " not found") #f)))
+    (else (msg "crop type " (symbol->string t) " not found") #f)))
 
 
 (define (find n l)
@@ -142,18 +140,15 @@
 (define (hectares->acres a) (* a 2.47105))
 (define (m3->gallons a) (* a 219.969))
 
-(define (error args)
-  (display (apply string-append args))(newline))
-
 (define (get-nutrients type amount quality season crop soil)
   (let ((nutrients (find type nutrients-metric)))
     (if (not nutrients)
         (begin 
-	  (error "nutrients type not found for:" type)
+	  (msg "nutrients type not found for:" (symbol->string type))
 	  (display nutrients)(newline))
         (let ((q (find quality (nutrients-table nutrients))))
           (if (not q)
-              (error "quality " (symbol->string quality) " not found for " type)
+              (msg "quality " (symbol->string quality) " not found for " (symbol->string type))
               (get-nutrients-inner
                (nutrients-amount nutrients)
                (nutrients-units nutrients)
@@ -168,7 +163,7 @@
     ;; nitrogen
     (let ((s (nitrogen-season (quality-n quality) season)))
       (if (not s)
-          (error "season not found")
+          (msg "season not found")
           (let ((c (if (soil? s)
                        (get-soil s soil)
                        s)))
@@ -194,7 +189,8 @@
    ((eq? t 'cattle) cattle-quality-list)
    ((eq? t 'pig) pig-quality-list)
    ((eq? t 'poultry) poultry-quality-list)
-   (else fym-quality-list)))
+   ((eq? t 'FYM) fym-quality-list)
+   (else (msg "quality not found for" (symbol->string t)))))
 
 (define (imperial->metric amount units)
   (if (eq? (current-units) 'metric)
@@ -209,11 +205,7 @@
       (kg/ha->units/acre amount)))
 
 (define (rounding-cash a)
-  (/ (round (* 100 a)) 100))
-
-(define (padcash->string a)
-  (let ((t (number->string (+ (rounding-cash a) 0.001))))
-    (substring t 0 (- (string-length t) 1))))
+  (/ (round (* 100 a)) 100)))
 
 (define (convert-input amount units)
   (if (eq? (current-units) 'metric)
@@ -276,3 +268,55 @@
 (define (current-seek-mul) (calc-seek-mul calc))
 (define (current-type) (calc-type calc))
 (define (current-quality) (calc-quality calc))
+
+(define (calc-nutrients calc)
+  (let ((type (calc-type calc))
+	(amount (calc-amount calc))
+	(quality (calc-quality calc))
+	(season (calc-season calc))
+	(crop (calc-crop calc))
+	(soil (calc-soil calc)))
+    (get-nutrients type amount quality season crop soil)))
+
+(define (update-seek-mul! calc manure)
+  (calc-modify-seek-mul 
+   calc
+   (if (and (eq? (current-units) 'imperial)
+	    (or (eq? manure 'cattle)
+		(eq? manure 'pig)))
+       100
+       (cond
+	((eq? manure 'poultry)
+	 (if (eq? (current-units) 'imperial)
+	     0.1 0.15))
+	(else 1)))))
+
+(define (get-units)
+  (let ((type (calc-type calc)))
+    (if (eq? (current-units) 'metric)
+        (nutrients-units (find type nutrients-metric))
+        (if (equal? (nutrients-units (find type nutrients-metric)) "m3/ha")
+            "gallons/acre"
+            "tons/acre"))))
+
+(define (nutrient-units event)
+  (let ((type (event-type event)))
+    (if (eq? (current-units) 'metric)
+        (nutrients-units (find type nutrients-metric))
+        (if (equal? (nutrients-units (find type nutrients-metric)) "m3/ha")
+            "gallons/acre"
+            "tons/acre"))))
+
+(define (amount-units event)
+  (let ((type (event-type event)))
+    (if (eq? (current-units) 'metric)
+        (if (equal? (nutrients-units (find type nutrients-metric)) "m3/ha")
+            "m3" "tonnes")
+        ;; it's imperial
+        (if (equal? (nutrients-units (find type nutrients-metric)) "m3/ha")
+            "gallons"
+            "tonnes"))))
+
+(define (get-cost-string-from-nutrient nutrient-index amounts mul)
+  (padcash->string (* (list-ref amounts nutrient-index)
+                      (list-ref costs nutrient-index) mul)))

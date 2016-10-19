@@ -5,30 +5,84 @@
 (define date-year (date.getYear))
 (define (equal? a b) (eq? a b))
 (define (round a) (Math.round a))
+(define (number->string a) (+ "" a))
+
+(define (padcash->string a)
+  (let ((t (+ (rounding-cash a) 0.001)))
+    (number->string (t.toFixed 2))))
 
 (load "scm/calc-core.jscm")
+(load "scm/translations.jscm")
 
-(define a 10)
-(msg "hello there")
+(define i18n-lang 0)
+(define (mtext-lookup id)
+  (define (_ l)
+    (cond
+     ((null? l) (string-append (symbol->string id) " not translated"))
+     ((eq? (car (car l)) id)
+      (let ((translations (cadr (car l))))
+        (if (<= (length translations) i18n-lang)
+            (string-append (symbol->string id) " not translated")
+            (let ((r (list-ref translations i18n-lang)))
+              (if (or (equal? r "") (equal? r " "))
+                  (list-ref translations 0) r)))))
+     (else (_ (cdr l)))))
+  (_ i18n-text))
 
-(define b 'symbol)
-(msg b)
-(msg (eq? b 'symbol))
+(define (get-options-for-type t)
+  (map
+   (lambda (q)
+     (list (mtext-lookup q) (symbol->string q)))
+   (get-qualities-for-type t)))
 
-(msg (/ 2 30))
+(define (current-units) 'metric)
 
+(define (run-calc)
+  (let ((nutrients (calc-nutrients calc)))
+    (update-dom "#nout" (convert-output (list-ref nutrients 0) "kg/ha"))
+    (update-dom "#pout" (convert-output (list-ref nutrients 1) "kg/ha"))
+    (update-dom "#kout" (convert-output (list-ref nutrients 2) "kg/ha"))
+    (update-dom "#amount" (string-append (convert-output (calc-amount calc) (get-units)) " " (get-units)))
+    (update-dom "#ncost" (string-append "£" (get-cost-string-from-nutrient 0 nutrients 1)))
+    (update-dom "#pcost" (string-append "£" (get-cost-string-from-nutrient 1 nutrients 1)))
+    (update-dom "#kcost" (string-append "£" (get-cost-string-from-nutrient 2 nutrients 1)))
+    ))
 
+(connect-select
+ "#type" (lambda (v) 
+	   (let ((v (string->symbol v)))
+	     (set! calc (calc-modify-type calc v))
+	     (set! calc (calc-modify-quality calc (car (get-qualities-for-type v))))
+	     (set! calc (update-seek-mul! calc v))
+	     (update-options "#quality" (get-options-for-type v))
+	     (run-calc))))
+
+(connect-select
+ "#quality" (lambda (v) 
+	      (set! calc (calc-modify-quality calc (string->symbol v)))
+	      (run-calc)))
+
+(connect-select
+ "#crop" (lambda (v) 
+	   (set! calc (calc-modify-crop calc (string->symbol v)))
+	   (run-calc)))
+
+(connect-select
+ "#soil" (lambda (v) 
+	   (set! calc (calc-modify-soil calc (string->symbol v)))
+	   (run-calc)))
+
+(connect-select
+ "#season" (lambda (v) 
+	     (set! calc (calc-modify-season calc (string->symbol v)))
+	     (run-calc)))
 
 (connect-slider 
  "#quantity" 
  (lambda (v)
-   (set! calc (calc-modify-amount calc v))
-   (msg (get-nutrients 
-	 (calc-type calc)
-	 (calc-amount calc)
-	 (calc-quality calc)
-	 (calc-season calc)
-	 (calc-crop calc)
-	 (calc-soil calc)))))
+   (set! calc 
+	 (calc-modify-amount 
+	  calc 
+	  (convert-input (* (current-seek-mul) v) (get-units))))
+   (run-calc)))
 
-(msg "done")

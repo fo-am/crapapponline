@@ -30,6 +30,10 @@ ditto.find_symbol = function(sym) {
     return f;
 }
 
+ditto.symbol_string = function(id) {
+    return ditto.symbols[id];
+}
+
 // match up cooresponding bracket to extract sexpr from a string
 ditto.extract_sexpr = function(pos, str) {
     var ret="";
@@ -525,7 +529,7 @@ ditto.comp = function(f) {
         if (typeof f == "string") {
 	    if (f[0] == "'") {
 		// we have a symbol
-		return ditto.find_symbol(f);
+		return ditto.find_symbol(f.substring(1,f.length));
 	    }
 	    return f;
 	}

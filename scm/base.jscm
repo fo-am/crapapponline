@@ -18,7 +18,12 @@
 
 (define display (lambda (str) (console.log str)))
 (define newline (lambda () (console.log "\n")))
-(define (msg a) (display a))
+(define (msg a) 
+  (define s "")
+  (js "for (var i=0; i<arguments.length; i++) {")
+  (set! s (string-append s (js "arguments[i]")))
+  (js "}")
+  (console.log s))
 (define (dbg a) (msg a) a)
 
 (define zero?
@@ -193,6 +198,13 @@
     (if (= n 0) 1
         (* n (factorial (- n 1))))))
 
+
+(define (symbol->string sym)
+  (ditto.symbol_string sym))
+
+(define (string->symbol str)
+  (ditto.find_symbol str))
+
 ;; convert code to text form
 ; (define (scheme-txt v)
 ;  (cond
@@ -260,7 +272,8 @@
     (when (not (eq? (cond (#t (+ 3 2) (+ 100 1)) (else (+ 4 3))) 101)) (display "cond test failed"))
     (when (not (eq? (when #t (+ 3 2) (+ 100 1)) 101)) (display "when test failed"))
     (when (not (eq? (cadr (assoc 2 (list (list 3 "one") (list 2 "three")))) "three")) (display "assoc test failed"))
-
+    (when (not (eq? (symbol->string 'one) "one")) (display "symbol->string failed"))
+    (when (not (eq? (string->symbol "one") 'one)) (display "string->symbol failed"))
     ))
 
 (unit-test)

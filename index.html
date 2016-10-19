@@ -14,9 +14,9 @@
 	    <div class="gutter">
 	      <div class="col-xs-12 col-sm-8 col-sm-offset-2">
 		<div class="row">Manure type</div>
-		<select>
+		<select id="type">
 		  <option value="cattle">Cattle Slurry</option>
-		  <option value="fym">Farmyard Manure</option>
+		  <option value="FYM">Farmyard Manure</option>
 		  <option value="pig">Pig Slurry</option>
 		  <option value="poultry">Poultry Litter</option>
 		</select>
@@ -28,16 +28,16 @@
 	    <div class="gutter">
 	      <div class="col-xs-12 col-sm-6">
 		<div class="row">Soil type</div>
-		<select>
+		<select id="soil">
 		  <option value="sandyshallow">Sandy/Shallow</option>
 		  <option value="mediumheavy">Medium/Heavy</option>
 		</select>
 	      </div>
 	      <div class="col-xs-12 col-sm-6">
 		<div class="row">Crop type</div>
-		<select>
+		<select id="crop">
 		  <option value="normal">All crops</option>
-		  <option value="grassland">Grassland/Winter oilseed rape</option>
+		  <option value="grass_oilseed">Grassland/Winter oilseed rape</option>
 		</select>
 	      </div>
 	    </div>
@@ -47,7 +47,7 @@
 	    <div class="gutter">
 	      <div class="col-xs-12 col-sm-6">
 		<div class="row">Season</div>
-		<select>
+		<select id="season">
 		  <option value="autumn">Autumn</option>
 		  <option value="winter">Winter</option>
 		  <option value="spring">Spring</option>
@@ -56,10 +56,10 @@
 	      </div>
 	      <div class="col-xs-12 col-sm-6">
 		<div class="row">Quality</div>
-		<select>
-		  <option value="cattle">2% DM (Thin soup)</option>
-		  <option value="fym">6% DM (Thick soup)</option>
-		  <option value="pig">10% DM (Porridge)</option>
+		<select id="quality">
+		  <option value="DM2">2% DM (Thin soup)</option>
+		  <option value="DM6">6% DM (Thick soup)</option>
+		  <option value="DM10">10% DM (Porridge)</option>
 		</select>
 	      </div>
 	    </div>
