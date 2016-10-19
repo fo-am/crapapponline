@@ -587,10 +587,10 @@ function init(filenames) {
         // load and compile the syntax parser
         var syntax_parse=ditto.load_unparsed("scm/syntax.jscm");
         try {
-            //        console.log(syntax_parse);
+            //console.log(syntax_parse);
             do_syntax=eval(syntax_parse);
         } catch (e) {
-            //console.log("An error occured parsing (syntax) of "+syntax_parse);
+            console.log("An error occured parsing (syntax) of "+syntax_parse);
             console.log(e);
             console.log(e.stack);
         }
@@ -598,6 +598,7 @@ function init(filenames) {
         var js=ditto.load("scm/base.jscm");
 
         filenames.forEach(function(filename) {
+            console.log("loading "+filename);
             js+=ditto.load(filename);
         });
 
