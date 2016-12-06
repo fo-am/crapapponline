@@ -20,18 +20,19 @@ var ditto = {};
 
 ditto.symbols = [];
 
-// -1 if not exists
 ditto.find_symbol = function(sym) {
     var f=ditto.symbols.indexOf(sym);
     if (f==-1) {
 	ditto.symbols.push(sym);
-	return ditto.symbols.length-1;
+	//return ditto.symbols.length-1;
     }
-    return f;
+    //return f;
+    return "\""+sym+"\"";
 }
 
 ditto.symbol_string = function(id) {
-    return ditto.symbols[id];
+    //return ditto.symbols[id];
+    return id;
 }
 
 // match up cooresponding bracket to extract sexpr from a string
@@ -100,6 +101,7 @@ ditto.parse_tree = function(str) {
                     (!in_quotes &&
                      (str[i]===" " ||
                       str[i]===")" ||
+                      str[i]==="\t" ||
                       str[i]==="\n"))) {
                     state="none";
                     if (in_quotes) {
@@ -205,6 +207,19 @@ ditto.check = function(fn,args,min,max) {
     }
     return true;
 };
+
+ditto.quote = function(args) {
+    if (typeof args == "string") {
+	if (ditto.is_number(args)) {
+	    return args;
+	} else {	
+	    return ditto.find_symbol(args); 
+	}
+    }
+    if (typeof args == "object") {
+	return "["+ditto.list_map(ditto.quote,args)+"]";
+    }
+}
 
 // generate code
 
@@ -324,6 +339,7 @@ ditto.core_forms = function(fn, args) {
     if (fn == "cond") if (ditto.check(fn,args,2,-1)) return debug+ditto.comp_cond(args);
     if (fn == "let") if (ditto.check(fn,args,2,-1)) return debug+ditto.comp_let(args);
     if (fn == "while") if (ditto.check(fn,args,2,-1)) return debug+ditto.comp_while(args);
+    if (fn == "quote") if (ditto.check(fn,args,1,-1)) return debug+ditto.quote(ditto.car(args));
 
     if (fn == "define") {
         // adding semicolon here
@@ -528,6 +544,9 @@ ditto.comp = function(f) {
         // string, number or list?
         if (typeof f == "string") {
 	    if (f[0] == "'") {
+		// the empty list
+		if (f=="'(") return "[]";
+
 		// we have a symbol
 		return ditto.find_symbol(f.substring(1,f.length));
 	    }
@@ -566,7 +585,7 @@ ditto.comp = function(f) {
 
 ditto.compile_code = function(scheme_code) {
     var parse_tree=ditto.parse_tree("("+scheme_code+")");
-//    alert(JSON.stringify(do_syntax(parse_tree)));
+    //console.log(JSON.stringify(do_syntax(parse_tree)));
     return ditto.comp(do_syntax(parse_tree));
 };
 
@@ -628,9 +647,9 @@ function init(filenames) {
 
         try {
             eval(js);
-//	    console.log(js);
+	    //console.log(js);
         } catch (e) {
-//	    console.log(js);
+	    //console.log(js);
             console.log(e);
             console.log(e.stack);
         }

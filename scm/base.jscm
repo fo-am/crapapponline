@@ -21,14 +21,18 @@
 (define (msg a) 
   (define s "")
   (js "for (var i=0; i<arguments.length; i++) {")
-  (set! s (string-append s (js "arguments[i]")))
+  (set! s (string-append s " " (js "arguments[i]")))
   (js "}")
   (console.log s))
 (define (dbg a) (msg a) a)
+(define (error a) (msg a))
 
 (define zero?
   (lambda (n)
     (= n 0)))
+
+(define (eqv? a b)
+  (eq? a b))
 
 (define (random n)
   (Math.floor (* (Math.random) n)))
@@ -40,6 +44,12 @@
 
 (define (max a b) (if (> a b) a b))
 (define (min a b) (if (< a b) a b))
+
+(define (substring str s e)
+  (js "str.substring(s, e);"))
+
+(define (string-length str)
+  (js "str.length"))
 
 ;; replaced by underlying iterative version
 ;;(define foldl
@@ -200,10 +210,11 @@
 
 
 (define (symbol->string sym)
-  (ditto.symbol_string sym))
+  sym);; (ditto.symbol_string sym))
 
 (define (string->symbol str)
-  (ditto.find_symbol str))
+  ;(ditto.find_symbol str)
+  str)
 
 ;; convert code to text form
 ; (define (scheme-txt v)
@@ -273,7 +284,9 @@
     (when (not (eq? (when #t (+ 3 2) (+ 100 1)) 101)) (display "when test failed"))
     (when (not (eq? (cadr (assoc 2 (list (list 3 "one") (list 2 "three")))) "three")) (display "assoc test failed"))
     (when (not (eq? (symbol->string 'one) "one")) (display "symbol->string failed"))
-    (when (not (eq? (string->symbol "one") 'one)) (display "string->symbol failed"))
+    ;;(when (not (eq? (string->symbol "one") 'one)) (display "string->symbol failed"))
+    ;;(msg (string->symbol "one"))
+    ;;(msg 'one)
     ))
 
 (unit-test)

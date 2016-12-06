@@ -1,4 +1,19 @@
 ;; -*- mode: scheme; -*-
+;; Farm Crap App Pro Copyright (C) 2016 FoAM Kernow
+;;
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU Affero General Public License as
+;; published by the Free Software Foundation, either version 3 of the
+;; License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU Affero General Public License for more details.
+;;
+;; You should have received a copy of the GNU Affero General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 (define date (js "new Date();"))
 (define date-day (date.getDate))
 (define date-month (date.getMonth))
@@ -11,6 +26,8 @@
   (let ((t (+ (rounding-cash a) 0.001)))
     (number->string (t.toFixed 2))))
 
+(load "scm/decision.jscm")
+(load "scm/manure.jscm")
 (load "scm/calc-core.jscm")
 (load "scm/translations.jscm")
 
@@ -29,11 +46,11 @@
      (else (_ (cdr l)))))
   (_ i18n-text))
 
-(define (get-options-for-type t)
+(define (get-options t l)
   (map
    (lambda (q)
      (list (mtext-lookup q) (symbol->string q)))
-   (get-qualities-for-type t)))
+   l))
 
 (define (current-units) 'metric)
 
@@ -53,14 +70,23 @@
 	   (let ((v (string->symbol v)))
 	     (set! calc (calc-modify-type calc v))
 	     (set! calc (calc-modify-quality calc (car (get-qualities-for-type v))))
-	     (set! calc (update-seek-mul! calc v))
-	     (update-options "#quality" (get-options-for-type v))
+	     (update-options "#quality" (get-options v (get-qualities-for-type v)))
+	     
+	     (msg v)
+	     (get-options v (get-application-for-type v))
+
+	     (update-options "#application" (get-options v (get-application-for-type v)))
 	     (run-calc))))
 
 (connect-select
  "#quality" (lambda (v) 
 	      (set! calc (calc-modify-quality calc (string->symbol v)))
 	      (run-calc)))
+
+(connect-select
+ "#application" (lambda (v) 
+		  (set! calc (calc-modify-application calc (string->symbol v)))
+		  (run-calc)))
 
 (connect-select
  "#crop" (lambda (v) 
