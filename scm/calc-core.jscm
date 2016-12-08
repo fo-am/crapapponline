@@ -38,7 +38,7 @@
 (define season-list (list 'autumn 'winter 'spring 'summer))
 
 (define cattle-quality-list (list 'DM2 'DM6 'DM10))
-(define pig-quality-list (list 'DM2 'DM4-pig 'DM6-pig))
+(define pig-quality-list (list 'DM2 'DM4 'DM6))
 (define poultry-quality-list (list 'layer 'broiler))
 (define fym-quality-list (list 'fym-cattle 'fym-pig 'fym-sheep 'fym-duck 'fym-horse))
 (define compost-quality-list (list 'green 'green-food))
@@ -95,28 +95,40 @@
   (/ (round (* 10 a)) 10))
 
 (define (get-nutrients type amount quality season crop soil application)
+  ;; apply all the extra conditional stuff here
+  (msg soil)
   (let ((params (list (list 'type type) 
 		      (list 'quality quality) 
 		      (list 'season season) 
 		      ;; IMPORTANT: we have to convert crop from the 
 		      ;; field types to send to manure
 		      (list 'crop (cond
-				   ((eq? crop 'grass) 'grass-oilseed)
+				   ((eq? crop 'grass-oilseed) 'grass-oilseed)
+ 				   ((eq? crop 'grass) 'grass-oilseed)
 				   (else 'normal))) 
 		      ;; also we have to convert soil to the two
 		      ;; types in manure (pp 66, note b)
 		      (list 'soil (cond 
-				   ((eq? crop 'sandyshallow) 'sandyshallow)
-				   ((eq? crop 'mediumshallow) 'sandyshallow)
+				   ((eq? soil 'sandyshallow) 'sandyshallow)
+				   ((eq? soil 'mediumshallow) 'sandyshallow)
 				   (else 'mediumheavy)))
 		      (list 'application application))))
-    (process-nutrients 
-     amount (get-amount-for-type type)
-     (list
-      (decision manure-tree (append (quote ((nutrient nitrogen))) params))
-      (decision manure-tree (append (quote ((nutrient phosphorous))) params))
-      (decision manure-tree (append (quote ((nutrient potassium))) params))))))
-
+    (msg params)
+    ;; get the total for pig or cattle slurry, then we apply the 
+    ;; percent value later to get the crop available
+    (let ((total (if (or (eq? type 'pig) (eq? type 'cattle))
+		     (decision n-total-tree params) 0)))      
+      (process-nutrients 
+       amount (get-amount-for-type type)
+       (list
+	;; if pig or cattle slurry, then this is the percent value
+	(let ((n (decision manure-tree (append (quote ((nutrient nitrogen))) params))))
+	  ;; apply percent or return straight value
+	  (msg "n has returned: " n)
+	  (if (zero? total) n (pc total n)))
+	(decision manure-tree (append (quote ((nutrient phosphorous))) params))
+	(decision manure-tree (append (quote ((nutrient potassium))) params)))))))
+  
 (define (get-qualities-for-type t)
   (cond
    ((eq? t 'cattle) cattle-quality-list)
@@ -134,8 +146,8 @@
 
 (define (get-amount-for-type t)
   (cond
-   ((eq? t 'cattle) 100)
-   ((eq? t 'pig) 50)
+   ((eq? t 'cattle) 1)
+   ((eq? t 'pig) 1)
    ((eq? t 'poultry) 10)
    ((eq? t 'compost) 1)
    (else 1)))
@@ -243,6 +255,7 @@
 	(soil (calc-soil calc))
 	(application (calc-application calc)))
     (get-nutrients type amount quality season crop soil application)))
+     
 
 (define (get-units)
   (let ((type (calc-type calc)))

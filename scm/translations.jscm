@@ -129,8 +129,8 @@
    (list 'DM4 (list "4% DM (Medium soup)"))
    (list 'DM6 (list "6% DM (Thick soup)"))
    (list 'DM10 (list "10% DM (Porridge)"))
-   (list 'DM4-pig (list "4% DM (Thick soup)"))
-   (list 'DM6-pig (list "6% DM (Porridge)"))
+   (list 'DM4 (list "4% DM (Thick soup)"))
+   (list 'DM6 (list "6% DM (Porridge)"))
    (list 'green (list "Green compost"))
    (list 'green-food (list "Green and foodwaste"))
 
