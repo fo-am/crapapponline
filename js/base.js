@@ -116,7 +116,7 @@ function connect_checkbox(id,fn) {
 }
 
 function update_dom(id,text) {
-    $(id).text(text);
+    $(id).html(text);
 }
 
 function update_options(id,arr) {
