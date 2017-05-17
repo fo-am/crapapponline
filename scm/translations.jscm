@@ -35,7 +35,9 @@
    (list 'crap-calculator (list "Crap Calculator"))
    (list 'season (list "Season"))
    (list 'quality (list "Quality"))
-   (list 'crop-availible (list "Crop available"))
+   (list 'total-availible (list "Total in manure"))
+   (list 'crop-availible (list "Crop available nutrients (Total in manure)"))
+   (list 'crop-availible-event (list "Crop available nutrients"))
    (list 'nutrient-n-metric (list "N Kg/ha"))
    (list 'nutrient-p-metric (list "P<sub><small>2</small></sub>O<sub><small>5</small></sub> Kg/ha"))
    (list 'nutrient-k-metric (list "K<sub><small>2</small></sub>O Kg/ha"))
@@ -69,8 +71,8 @@
    (list 'winter-wheat-incorporated (list "Winter wheat, straw incorporated")) 
    (list 'spring-barley-removed (list "Spring barley, straw removed"))
    (list 'spring-barley-incorporated (list "Spring barley, straw incorporated"))
-   (list 'grass-cut (list "Grass cut (yield 6-8k, conc 1.5, stock med)"))
-   (list 'grass-grazed (list "Grass grazed (yield 6-8k, conc 1.5, stock med)"))
+   (list 'grass-cut (list "Grass cut"))
+   (list 'grass-grazed (list "Grass grazed"))
    
    ;; previous crop types
    (list 'cereals (list "Cereals"))
@@ -156,15 +158,18 @@
    (list 'custom-manure (list "Custom"))
 
    (list 'rainfall (list "Your farm's rainfall"))
-   (list 'high (list "High"))
-   (list 'medium (list "Medium"))
-   (list 'low (list "Low"))
+   (list 'rain-high (list "High (>700mm)"))
+   (list 'rain-medium (list "Medium (600-700mm)"))
+   (list 'rain-low (list "Low (<600mm)"))
 
    (list 'fertiliser-costs (list "Your fertiliser costs"))
    (list 'costs-blurb (list "How much do you pay for your fertiliser? This is used to calculate your cost savings."))
-   (list 'n-cost (list "N"))
-   (list 'p-cost (list "P<sub><small>2</small></sub>O<sub><small>5</small></sub>"))
-   (list 'k-cost (list "K<sub><small>2</small></sub>O"))
+   (list 'n-cost (list "N (£ per Kg)"))
+   (list 'p-cost (list "P<sub><small>2</small></sub>O<sub><small>5</small></sub> (£ per Kg)"))
+   (list 'k-cost (list "K<sub><small>2</small></sub>O (£ per Kg)"))
+   (list 'n-cost-imperial (list "N (£ per unit)"))
+   (list 'p-cost-imperial (list "P<sub><small>2</small></sub>O<sub><small>5</small></sub> (£ per unit)"))
+   (list 'k-cost-imperial (list "K<sub><small>2</small></sub>O (£ per unit)"))
 
    ;; soil tests
    (list 'soil-test-p (list "P"))
@@ -196,7 +201,7 @@
    
    (list 'delete-are-you-sure (list "Are you sure you want to delete this?"))
 
-   (list 'still-needed (list "Fertiliser still needed"))
+   (list 'still-needed (list "Nutrients still needed"))
 
    (list 'camera (list "Camera"))
    (list 'take-photo (list "Take photo"))

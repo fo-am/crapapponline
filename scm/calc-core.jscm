@@ -48,7 +48,7 @@
 (define cattle-application-list
   (list 'splash-surface 'splash-incorporated 'shoe-bar-spreader 'shallow-injected))
 
-(define rainfall-list (list 'high 'medium 'low))
+(define rainfall-list (list 'rain-high 'rain-medium 'rain-low))
 
 ;; metric/imperial conversion
 (define (tons/acre->tons/ha a) (* a 2.47105381))
@@ -65,7 +65,7 @@
 (define (hectares->m2 a) (* a 10000))
 
 ;; overwritten by db values
-(define costs (list 0.79 0.62 0.49))
+(define costs (list 0 0 0))
 (define custom-override #f)
 (define (set-custom-override! s) (set! custom-override s))
 
@@ -85,7 +85,6 @@
     (else (find n (cdr l)))))
 
 (define (process-nutrients amount nutrients)
-  (msg "amount is:" amount)
   (map
    (lambda (q)
      (if (number? q)
@@ -156,26 +155,27 @@
        (else (msg "I don't understand how to convert" units)))))
 
 (define (convert-output amount units)
-  (rounding
-   (if (eq? (current-units) 'metric)
-       amount
-       (cond
-        ((or (equal? units "m3/ha") (equal? units "gallons/acre"))
-         (m3/ha->gallons/acre amount))
-        ((or (equal? units "tons/ha") (equal? units "tons/acre"))
-         (tons/ha->tons/acre amount))
-        ((or (equal? units "kg/ha") (equal? units "units/acre"))
-         (kg/ha->units/acre amount))
-        ((or (equal? units "hectares") (equal? units "acres"))
-         (hectares->acres amount))
-        ((or (equal? units "m3") (equal? units "gallons"))
-         (m3->gallons amount))
-        ((equal? units "tonnes") amount) ;; tonnes are metric everywhere!?
-        (else (msg "I don't understand how to convert" units))))))
-
+  (if (eq? #f amount) 0 ;; if it's missing from the database
+      (rounding
+       (if (eq? (current-units) 'metric)
+	   amount
+	   (cond
+	    ((or (equal? units "m3/ha") (equal? units "gallons/acre"))
+	     (m3/ha->gallons/acre amount))
+	    ((or (equal? units "tons/ha") (equal? units "tons/acre"))
+	     (tons/ha->tons/acre amount))
+	    ((or (equal? units "kg/ha") (equal? units "units/acre"))
+	     (kg/ha->units/acre amount))
+	    ((or (equal? units "hectares") (equal? units "acres"))
+	     (hectares->acres amount))
+	    ((or (equal? units "m3") (equal? units "gallons"))
+	     (m3->gallons amount))
+	    ((equal? units "tonnes") amount) ;; tonnes are metric everywhere!?
+	    (else (msg "I don't understand how to convert" units)))))))
+  
 ;; the manure calculator
 (define calc
-  (list 'pig 25 'DM2 'autumn 'normal 'mediumshallow 'splash-surface
+  (list 'cattle 25 'DM2 'autumn 'normal 'mediumshallow 'splash-surface
 	(list date-day date-month date-year)
 	1 1 
 	(list 'soil-p-0 'soil-k-0)))
@@ -219,7 +219,11 @@
 	(application (calc-application calc))
 	(soil-test (calc-soil-test calc)))
     (if custom-override  
-	(process-nutrients amount custom-override)
+	(list 
+	 ;; total
+	 (process-nutrients amount custom-override)
+	 ;; avail (duplicate)
+	 (process-nutrients amount custom-override))
 	(get-nutrients type amount quality season crop soil application soil-test))))
 
 
@@ -354,15 +358,27 @@
 			     (eq? (cadr soil-test) 'soil-k-3))
 			 'k-total
 			 'k-avail)))
-
-      (process-nutrients 
-       amount 
-       (list
-	;; if pig or cattle slurry, then this is the percent value
-	(let ((n (decision manure-tree (append (quote ((nutrient nitrogen))) params))))
-	  ;; N/A value
-	  (if (eq? n 'NA) n
-	      ;; apply percent or return straight value
-	      (if (zero? total) n (pc total n))))
-	(decision manure-tree (append (list (list 'nutrient phosphorous)) params))
-	(decision manure-tree (append (list (list 'nutrient potassium)) params)))))))
+      (list
+       ;; total values
+       (process-nutrients 
+	amount 
+	(list
+	 ;; if pig or cattle slurry, then this is the percent value
+	 (if (zero? total) 
+	     (decision manure-tree (append (list (list 'nutrient 'n-total))) params)
+	     total)
+	 (decision manure-tree (append (list (list 'nutrient 'p-total)) params))
+	 (decision manure-tree (append (list (list 'nutrient 'k-total)) params))))
+       
+       ;; crop availible values
+       (process-nutrients 
+	amount 
+	(list
+	 ;; if pig or cattle slurry, then this is the percent value
+	 (let ((n (decision manure-tree (append (quote ((nutrient n-avail))) params))))
+	   ;; N/A value
+	   (if (eq? n 'NA) n
+	       ;; apply percent or return straight value
+	       (if (zero? total) n (pc total n))))
+	 (decision manure-tree (append (list (list 'nutrient phosphorous)) params))
+	 (decision manure-tree (append (list (list 'nutrient potassium)) params))))))))

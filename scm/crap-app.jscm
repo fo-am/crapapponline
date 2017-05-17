@@ -1,5 +1,5 @@
 ;; -*- mode: scheme; -*-
-;; Farm Crap App Pro Copyright (C) 2016 FoAM Kernow
+;; Farm Crap App Pro Copyright (C) 2016 Dave Griffiths
 ;;
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU Affero General Public License as
@@ -14,6 +14,8 @@
 ;; You should have received a copy of the GNU Affero General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define date (js "new Date();"))
 (define date-day (date.getDate))
 (define date-month (date.getMonth))
@@ -21,6 +23,7 @@
 (define (equal? a b) (eq? a b))
 (define (round a) (Math.round a))
 (define (number->string a) (+ "" a))
+(define (symbol? x) (number? x))
 
 (define (padcash->string a)
   (let ((t (+ (rounding-cash a) 0.001)))
@@ -30,6 +33,9 @@
 (load "scm/manure.jscm")
 (load "scm/calc-core.jscm")
 (load "scm/translations.jscm")
+(load "scm/images.jscm")
+
+(define costs (list 0.79 0.62 0.49))
 
 (define i18n-lang 0)
 (define (mtext-lookup id)
@@ -57,16 +63,25 @@
 (define (update-current-units u) (set! the-current-units u))
 
 (define (run-calc)
-  (msg (convert-output (calc-amount calc) (get-units)))
   (let ((nutrients (calc-nutrients calc)))
-    (update-dom "#nout" (convert-output (list-ref nutrients 0) "kg/ha"))
-    (update-dom "#pout" (convert-output (list-ref nutrients 1) "kg/ha"))
-    (update-dom "#kout" (convert-output (list-ref nutrients 2) "kg/ha"))
-    (update-dom "#amount" (string-append (convert-output (calc-amount calc) (get-units)) " " (get-units)))
-    (update-dom "#ncost" (string-append (get-cost-string-from-nutrient 0 nutrients 1)))
-    (update-dom "#pcost" (string-append (get-cost-string-from-nutrient 1 nutrients 1)))
-    (update-dom "#kcost" (string-append (get-cost-string-from-nutrient 2 nutrients 1)))
-    ))
+    (let ((total (list-ref nutrients 0))
+	  (avail (list-ref nutrients 1)))
+      (update-dom "#nout" (string-append
+			   (convert-output (list-ref avail 0) "kg/ha") " (" 
+			   (convert-output (list-ref total 0) "kg/ha") ")"))
+      (update-dom "#pout" (string-append
+			   (convert-output (list-ref avail 1) "kg/ha") " (" 
+			   (convert-output (list-ref total 1) "kg/ha") ")"))
+      (update-dom "#kout" (string-append
+			   (convert-output (list-ref avail 2) "kg/ha") " (" 
+			   (convert-output (list-ref total 2) "kg/ha") ")"))
+      (update-dom "#amount" (string-append (convert-output (calc-amount calc) (get-units)) " " (get-units)))
+      (update-dom "#ncost" (string-append (get-cost-string-from-nutrient 0 avail 1)))
+      (update-dom "#pcost" (string-append (get-cost-string-from-nutrient 1 avail 1)))
+      (update-dom "#kcost" (string-append (get-cost-string-from-nutrient 2 avail 1)))
+
+      (update-image "#manure-image" (string-append "images/" (find-image (calc-type calc) (calc-amount calc)) ".jpg"))
+      )))
 
 (define (update-units-text)
   (cond 
@@ -128,7 +143,6 @@
 (connect-slider 
  "#quantity" 
  (lambda (v)
-   (msg (current-seek-mul))
    (set! calc 
 	 (calc-modify-amount 
 	  calc 
@@ -138,3 +152,4 @@
 (update-units-text)
 (run-calc)
 (update-options "#application" (get-options 'cattle (get-application-for-type 'cattle)))
+

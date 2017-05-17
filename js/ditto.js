@@ -330,7 +330,7 @@ ditto.list_replace_helper = function(l,index,val) {
 ditto.core_forms = function(fn, args) {
 
 //    var debug = "// generating: "+fn+"\n";
-    var debug = "/* "+fn+" */ ";
+    var debug = ""; //"/* "+fn+" */ ";
 
     // core forms
     if (fn == "lambda") if (ditto.check(fn,args,2,-1)) return debug+ditto.comp_lambda(args);

@@ -119,6 +119,11 @@ function update_dom(id,text) {
     $(id).html(text);
 }
 
+function update_image(id,url) {
+    console.log(url);
+    $(id).attr("src",url);
+}
+
 function update_options(id,arr) {
     var o = $(id)[0];
     o.options.length=0;
